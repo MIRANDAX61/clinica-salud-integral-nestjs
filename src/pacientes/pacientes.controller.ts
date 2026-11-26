@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 
 import { PacientesService } from './pacientes.service.js';
+import { CreatePacienteDto } from './dto/create-paciente.dto.js';
+import { UpdatePacienteDto } from './dto/update-paciente.dto.js';
 
 @Controller('pacientes')
 export class PacientesController {
@@ -28,16 +30,16 @@ export class PacientesController {
   }
 
   @Post()
-  create(@Body() body: any) {
-    return this.pacientesService.create(body);
+  create(@Body() dto: CreatePacienteDto) {
+    return this.pacientesService.create(dto);
   }
 
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
+    @Body() dto: UpdatePacienteDto,
   ) {
-    return this.pacientesService.update(id, body);
+    return this.pacientesService.update(id, dto);
   }
 
   @Delete(':id')
