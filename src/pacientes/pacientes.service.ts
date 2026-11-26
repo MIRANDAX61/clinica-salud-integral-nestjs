@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service.js';
+import { BadRequestException } from '@nestjs/common';
+import { CreatePacienteDto } from './dto/create-paciente.dto.js';
+import { UpdatePacienteDto } from './dto/update-paciente.dto.js';
+
 
 @Injectable()
 export class PacientesService {
@@ -26,24 +30,24 @@ export class PacientesService {
     return paciente;
   }
 
-  create(data: any) {
+  create(data: CreatePacienteDto) {
     return this.prisma.paciente.create({
       data: {
         ...data,
-        fecha_nacimiento: new Date(data.fecha_nacimiento),
+        fecha_nacimiento: this.validarFechaNacimiento(data.fecha_nacimiento),
       },
     });
   }
 
-  async update(id: number, data: any) {
+  async update(id: number, data: UpdatePacienteDto) {
     await this.findOne(id);
 
     return this.prisma.paciente.update({
       where: { id },
       data: {
         ...data,
-        ...(data.fecha_nacimiento && {
-          fecha_nacimiento: new Date(data.fecha_nacimiento),
+        ...(data.fecha_nacimiento !== undefined && {
+          fecha_nacimiento: this.validarFechaNacimiento(data.fecha_nacimiento),
         }),
       },
     });
@@ -66,4 +70,16 @@ export class PacientesService {
       where: { id },
     });
   }
+
+  private validarFechaNacimiento(fecha: string): Date {
+  const fechaNacimiento = new Date(fecha);
+
+  if (fechaNacimiento > new Date()) {
+    throw new BadRequestException(
+      'La fecha de nacimiento no puede ser futura',
+    );
+  }
+
+  return fechaNacimiento;
+}
 }
